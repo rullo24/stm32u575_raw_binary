@@ -11,8 +11,8 @@
 
 MEMORY
 {
-    FLASH (rx) : ORIGIN = 0x0800000, LENGTH = 0x200000
-    RAM (xrw) : ORIGIN = 0x2000000, LENGTH = 0x0C0000
+    FLASH (rx) : ORIGIN = 0x08000000, LENGTH = 0x200000
+    RAM (xrw) : ORIGIN = 0x20000000, LENGTH = 0x0C0000
 }
 
 /* ================================================================
@@ -48,7 +48,6 @@ SECTIONS
    {
         KEEP(*(.isr_vector)) /* linker should not discard this even if unused because CPU jumps here on reset */
    } >FLASH
-}
 
 /* ------------------------------------------------------------
 * STEP 4: Program code (.text)
@@ -58,11 +57,11 @@ SECTIONS
 * because it is read-only and must persist across resets.
 * ------------------------------------------------------------ */
 
-.text :
-{
-    *(.text) /* all sections named exactly ".text" */
-    *(.text*) /* any sections that start with ".text" e.g. ".text.main" */
-} >FLASH
+    .text :
+    {
+        *(.text) /* all sections named exactly ".text" */
+        *(.text*) /* any sections that start with ".text" e.g. ".text.main" */
+    } >FLASH
 
 /* ------------------------------------------------------------
 * STEP 5: Read-only data (.rodata)
@@ -72,11 +71,11 @@ SECTIONS
 * to avoid wasting RAM.
 * ------------------------------------------------------------ */
 
-.rodata :
-{
-    *(.rodata) /* all read-only data sections */
-    *(.rodata*) /* and any that start with .rodata */
-} >FLASH
+    .rodata :
+    {
+        *(.rodata) /* all read-only data sections */
+        *(.rodata*) /* and any that start with .rodata */
+    } >FLASH
 
 /* ------------------------------------------------------------
 * STEP 6: Initialized variables (.data)
@@ -97,15 +96,15 @@ SECTIONS
 *   - _edata: End address in RAM (know when to stop copying)
 * ------------------------------------------------------------ */
 
-_sidata = LOADADDR(.data) /* addr in flash where .data is stored */
-
-.data :
-{
-    _sdata = .; /* . = current location, save as start of .data in RAM */
-    *(.data)
-    *(.data*)
-    _edata = .; /* Save current location as end of .data in RAM */
-} >RAM AT >FLASH /* Link as if in RAM, but store in Flash */
+    .data :
+    {
+        _sdata = .; /* . = current location, save as start of .data in RAM */
+        *(.data)
+        *(.data*)
+        _edata = .; /* Save current location as end of .data in RAM */
+    } >RAM AT> FLASH /* Link as if in RAM, but store in Flash */
+    
+    _sidata = LOADADDR(.data); /* addr in flash where .data is stored */
 
 /* ------------------------------------------------------------
 * STEP 7: Uninitialized variables (.bss)
@@ -134,14 +133,14 @@ _sidata = LOADADDR(.data) /* addr in flash where .data is stored */
 * Location: RAM only (nothing to copy from Flash, just zero it)
 * ------------------------------------------------------------ */
 
-.bss :
-{
-    _sbss = .;
-    *(.bss)
-    *(.bss*)
-    *(COMMON) /* collect common sections (uninit globals) */
-    _ebss = .;
-} >RAM
+    .bss :
+    {
+        _sbss = .;
+        *(.bss)
+        *(.bss*)
+        *(COMMON) /* collect common sections (uninit globals) */
+        _ebss = .;
+    } >RAM
 
 /* ------------------------------------------------------------
 * STEP 8: Stack and Heap Space
@@ -178,12 +177,14 @@ _sidata = LOADADDR(.data) /* addr in flash where .data is stored */
 *   - end, _end: Used by some C libraries (we define them for compatibility)
 * ------------------------------------------------------------ */
 
-.user_heap_stack :
-{
-    . = ALIGN(8); /* align to 8-byte boundary (ARM requirement) */
-    PROVIDE ( end = . );
-    PROVIDE ( _end = . );
-    . = . + 0x200; /* reserve 512 bytes for heap */
-    . = . + 0x400; /* reserver 1KB for stack */
-    . = ALIGN(8); /* align end to 8-byte boundary */
+    .user_heap_stack :
+    {
+        . = ALIGN(8); /* align to 8-byte boundary (ARM requirement) */
+        PROVIDE ( end = . );
+        PROVIDE ( _end = . );
+        . = . + 0x200; /* reserve 512 bytes for heap */
+        . = . + 0x400; /* reserver 1KB for stack */
+        . = ALIGN(8); /* align end to 8-byte boundary */
+    }
+
 }
