@@ -80,5 +80,63 @@ size: $(BIN_DIR)/$(PROJECT).elf
 disasm: $(BIN_DIR)/$(PROJECT).elf
 	$(OBJDUMP) -d $<
 
+# ================================================================
+# OpenOCD Configuration
+# ================================================================
+
+# OpenOCD interface (ST-Link is most common for STM32)
+OPENOCD_INTERFACE = interface/stlink.cfg
+
+# OpenOCD target (STM32U5 series)
+OPENOCD_TARGET = target/stm32u5x.cfg
+
+# OpenOCD command
+OPENOCD = openocd
+
+# Flash the firmware to the device
+flash: $(BIN_DIR)/$(PROJECT).elf
+	@echo "Flashing $(BIN_DIR)/$(PROJECT).elf to device..."
+	$(OPENOCD) -f $(OPENOCD_INTERFACE) -f $(OPENOCD_TARGET) \
+		-c "program $(BIN_DIR)/$(PROJECT).elf verify reset exit"
+
+# Flash using binary file (alternative)
+flash-bin: $(BIN_DIR)/$(PROJECT).bin
+	@echo "Flashing $(BIN_DIR)/$(PROJECT).bin to device..."
+	$(OPENOCD) -f $(OPENOCD_INTERFACE) -f $(OPENOCD_TARGET) \
+		-c "program $(BIN_DIR)/$(PROJECT).bin 0x08000000 verify reset exit"
+
+# Start OpenOCD server (for GDB debugging)
+openocd:
+	@echo "Starting OpenOCD server..."
+	@echo "Connect GDB with: target remote localhost:3333"
+	$(OPENOCD) -f $(OPENOCD_INTERFACE) -f $(OPENOCD_TARGET)
+
+# Reset the device
+reset:
+	@echo "Resetting device..."
+	$(OPENOCD) -f $(OPENOCD_INTERFACE) -f $(OPENOCD_TARGET) \
+		-c "init" -c "reset run" -c "shutdown"
+
+# Erase the flash memory
+erase:
+	@echo "Erasing flash memory..."
+	$(OPENOCD) -f $(OPENOCD_INTERFACE) -f $(OPENOCD_TARGET) \
+		-c "init" -c "flash erase_sector 0 0 last" -c "shutdown"
+
+# Build and flash in one command
+build-flash: all flash
+
+# Start GDB debugger (requires OpenOCD server running in another terminal)
+# Usage: Terminal 1: make openocd
+#        Terminal 2: make gdb
+gdb: $(BIN_DIR)/$(PROJECT).elf
+	@echo "Starting GDB..."
+	@echo "Make sure OpenOCD is running in another terminal: make openocd"
+	arm-none-eabi-gdb $(BIN_DIR)/$(PROJECT).elf \
+		-ex "target remote localhost:3333" \
+		-ex "monitor reset halt" \
+		-ex "load" \
+		-ex "monitor reset"
+
 # Phony targets (not files)
-.PHONY: all clean size disasm
+.PHONY: all clean size disasm flash flash-bin openocd reset erase build-flash gdb
