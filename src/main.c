@@ -7,7 +7,12 @@
 #define GPIOB_START_ADDR 0x42020400 
 #define GPIOB_END_ADDR 0x420207FF
 
-// See reference manual page 642: GPIO register map and reset values
+/// === GPIO REGISTERS REQUIRED (reference manual page 642) === ///
+// MODER - offset=0x00: Pin mode (input/output/alternate/analog)
+// OTYPER - offset=0x04: Output type (push-pull/open-drain)
+// OSPEEDR - offset=0x08: Output speed (low/medium/high/very high)
+// PUPDR - offset=0x0C: Pull-up/pull-down resistor configuration
+// BSRR - offset=0x18: Bit set/reset register (atomic pin control)
 
 // see nucleo144 board pdf page 25: LEDs for registers used
 
