@@ -2,3 +2,4 @@ bin
 obj
 .DS_STORE
 gdb_commands.txt
+ref/stm32u5_reference_manual.pdf

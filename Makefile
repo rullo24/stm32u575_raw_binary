@@ -126,17 +126,5 @@ erase:
 # Build and flash in one command
 build-flash: all flash
 
-# Start GDB debugger (requires OpenOCD server running in another terminal)
-# Usage: Terminal 1: make openocd
-#        Terminal 2: make gdb
-gdb: $(BIN_DIR)/$(PROJECT).elf
-	@echo "Starting GDB..."
-	@echo "Make sure OpenOCD is running in another terminal: make openocd"
-	arm-none-eabi-gdb $(BIN_DIR)/$(PROJECT).elf \
-		-ex "target remote localhost:3333" \
-		-ex "monitor reset halt" \
-		-ex "load" \
-		-ex "monitor reset"
-
 # Phony targets (not files)
-.PHONY: all clean size disasm flash flash-bin openocd reset erase build-flash gdb
+.PHONY: all clean size disasm flash flash-bin openocd reset erase build-flash
