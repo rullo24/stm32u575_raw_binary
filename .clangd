@@ -1,0 +1,17 @@
+CompileFlags:
+  Add:
+    - -I/Users/kali/vc/stm32u575_raw_binary/include
+    - -mcpu=cortex-m33
+    - -mthumb
+    - -ffreestanding
+    - -nostdlib
+    - -nostartfiles
+    - --target=arm-none-eabi
+
+Diagnostics:
+  Suppress:
+    - unused-includes
+    - missing-includes
+
+Index:
+  Background: Build

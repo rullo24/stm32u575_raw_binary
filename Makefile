@@ -15,6 +15,7 @@ PROJECT = firmware
 SRC_DIR = src
 OBJ_DIR = obj
 BIN_DIR = bin
+INC_DIR = include
 
 # Source files (from src directory)
 SOURCES = $(wildcard $(SRC_DIR)/*.c)
@@ -23,15 +24,16 @@ SOURCES = $(wildcard $(SRC_DIR)/*.c)
 OBJECTS = $(SOURCES:$(SRC_DIR)/%.c=$(OBJ_DIR)/%.o)
 
 # Compiler flags
-CFLAGS = -mcpu=cortex-m33 \
-         -mthumb \
-         -Os \
-         -ffreestanding \
-         -nostdlib \
-         -nostartfiles \
-         -Wall \
-         -Wextra \
-         -g
+CFLAGS = 	-mcpu=cortex-m33 \
+			-mthumb \
+			-Os \
+			-ffreestanding \
+			-nostdlib \
+			-nostartfiles \
+			-I$(INC_DIR) \
+			-Wall \
+			-Wextra \
+			-g
 
 # Linker flags
 LDFLAGS = -mcpu=cortex-m33 \
