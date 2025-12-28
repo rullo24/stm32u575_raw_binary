@@ -2,54 +2,25 @@
 * bare‑metal main for STM32U575
 * ================================================================ */
 
-#include "structs.h"
+#include "gpio.h"
+#include "rcc.h"
+#include "uart.h"
+#include "systick.h"
 
-// See reference manual page 147: Memory map and peripheral register boundary addresses
-
-#define GPIOB_BASE_ADDR 0x42020400UL 
-#define GPIO_2BIT_MASK 0b11 
-#define GPIO_1BIT_MASK 0b01 
-
-#define RCC_BASE_ADDR 0x46020C00UL // RCC (Reset and Clock Control) base address - non-secure boundary
-#define RCC_AHB2ENR1_OFFSET 0x8C // RCC AHB2 peripheral clock enable register 1 offset
-#define RCC_AHB2ENR1 (*(volatile uint32_t*)(RCC_BASE_ADDR + RCC_AHB2ENR1_OFFSET)) // RCC AHB2ENR1 register access
-
-// see nucleo144 board pdf page 25: LEDs for registers used
-
-// See reference manual page 633: GPIO registers
-#define GPIO_MODER_GENERAL_PURPOSE_OUTPUT 0b01
-#define GPIO_OTYPER_OUTPUT_PUSH_PULL 0b0 
-#define GPIO_OSPEEDR_LOW_SPEED 0b00
-#define GPIO_OSPEEDR_MEDIUM_SPEED 0b01
-#define GPIO_OSPEEDR_HIGH_SPEED 0b10
-#define GPIO_OSPEEDR_VERY_HIGH_SPEED 0b11
-#define GPIO_PUPDR_NO_PULL_UP_OR_DOWN 0b00
-#define GPIO_PUPDR_PULL_UP 0b01
-#define GPIO_PUPDR_PULL_DOWN 0b10
-#define GPIO_BSRR_RESET_BIT 0b1
-#define GPIO_BSRR_SET_BIT 0b1
+static GPIO_REGISTER_t *const p_GPIOB = (GPIO_REGISTER_t*)GPIOB_BASE_ADDR;
 
 int main(void) {
 
-    // enable the GPIOB peripheral clock by setting the appropriate bit in RCC_AHB2ENR
-    RCC_AHB2ENR1 |= (1 << 1);  // Enable GPIOB clock
+    // configure system clock first (required before peripheral tick)
+    // sysClkConfig();
 
-    // PB7 == Blue LED
-    volatile GPIO_REGISTER_t *p_gpio_b = (GPIO_REGISTER_t*)GPIOB_BASE_ADDR;
-    p_gpio_b->moder &= ~(GPIO_2BIT_MASK << (2*7));  // Clear bits 14:15
-    p_gpio_b->moder |= GPIO_MODER_GENERAL_PURPOSE_OUTPUT << (2*7); // double-bit width
+    // init peripherals
+    // uartInit();
+    // sysTickInit();
+    gpioInit(p_GPIOB, BLUE_LED_PIN);
 
-    p_gpio_b->otyper &= ~(GPIO_1BIT_MASK << 7);  // Clear bit 7 (push-pull = 0)
-    p_gpio_b->otyper |= GPIO_OTYPER_OUTPUT_PUSH_PULL << 7; // single-bit width
-
-    p_gpio_b->ospeedr &= ~(GPIO_2BIT_MASK << (2*7));  // Clear bits 14:15
-    p_gpio_b->ospeedr |= GPIO_OSPEEDR_LOW_SPEED << (2*7); // double-bit width
-
-    p_gpio_b->pupdr &= ~(GPIO_2BIT_MASK << (2*7));  // Clear bits 14:15
-    p_gpio_b->pupdr |= GPIO_PUPDR_PULL_UP << (2*7); // double-bit width
-
-    // setting LED on
-    p_gpio_b->bsrr |= GPIO_BSRR_SET_BIT << 7; // no reset in here for now
+    // turn on blue LED
+    gpioLedOn(p_GPIOB, BLUE_LED_PIN);
 
     while (1) {
         __asm__("nop");

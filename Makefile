@@ -123,7 +123,8 @@ reset:
 erase:
 	@echo "Erasing flash memory..."
 	$(OPENOCD) -f $(OPENOCD_INTERFACE) -f $(OPENOCD_TARGET) \
-		-c "init" -c "flash erase_sector 0 0 last" -c "shutdown"
+		-c "init" -c "halt" -c "flash erase_sector 0 0 last" -c "shutdown"
+	$(MAKE) reset
 
 # Build and flash in one command
 build-flash: all flash
